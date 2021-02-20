@@ -1,0 +1,9 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+*.out
+/UkkonenAlgo.vcxproj.user
+/UkkonenAlgo.vcxproj.filters
+/UkkonenAlgo.vcxproj
+/Debug

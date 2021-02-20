@@ -5,6 +5,8 @@
 
 std::shared_ptr<int>tp;
 using namespace std;
+
+
 struct B{
 
     virtual void print(){
@@ -21,8 +23,10 @@ struct D:public B{
     int da;
 };
 
-int main(){
 
+int main(){
+    using namespace First;
+    
     SuffixTree st("abcdefghijklmnopqrstuvwxyz");
 
     st.print();
