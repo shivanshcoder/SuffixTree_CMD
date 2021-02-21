@@ -242,12 +242,12 @@ namespace Second {
 
 		// Checks if a edge exists starting with specified character from the node
 		bool linkNodeExists(char charLinkNode) {
-			return (linkedNodes.find(charLinkNode) != linkedNodes.end());
+			return (childrenNodes.find(charLinkNode) != childrenNodes.end());
 		}
 
 		// Returns the pair of start and end index for the edge
 		// Returns -1, -1 in case the 
-		bool charExistsOnLinkedNodes(int activeEdgeChar) {
+		bool charExistsOnchildrenNodes(int activeEdgeChar) {
 
 		}
 
@@ -259,8 +259,8 @@ namespace Second {
 
 		// Creates a new edge link from the node
 		void addEdgeNode(char edgeChar, const std::shared_ptr<SuffixNode>& node) {
-			linkedNodes[edgeChar] = node;
-
+			childrenNodes[edgeChar] = node;
+				
 		}
 
 		// Prints the Node and further connected nodes 
@@ -287,12 +287,12 @@ namespace Second {
 			indent += std::string((*endEdgeIndex - startEdgeIndex + nodeName.length()), ' ');
 
 			int i = 0;
-			for (auto& edge : linkedNodes) {
+			for (auto& edge : childrenNodes) {
 				// edge.first is the first character for the edge 
 				// edge.second is the SuffixNode Reference
 
 				cout << indent << "|" << endl;
-				if (i == linkedNodes.size() - 1) {
+				if (i == childrenNodes.size() - 1) {
 					edge.second->print(suffixString, indent + " ");
 				}
 				else {
@@ -319,7 +319,7 @@ namespace Second {
 		SuffixNode& suffixLink;
 
 		// Hash Map which stores all the further linked nodes of the Suffix Tree
-		std::unordered_map<char, std::shared_ptr<SuffixNode>> linkedNodes;
+		std::unordered_map<char, std::shared_ptr<SuffixNode>> childrenNodes;
 
 		// TODO Separate the printable elements helpers
 		std::string nodeName;
@@ -351,9 +351,15 @@ namespace Second {
 			//Keep doing this if we have characters left
 			while (remainingCharacters > 0) {
 
-				// First Check if the 
+				if (activeLength == 0) {
+					activeEdge = characterIndex;
+				}
 
-				if (!activeNode.linkNodeExists(suffixString[characterIndex])) {
+
+
+				// First Check if there is an outgoing adge with activeEdge index character
+
+				if (!activeNode.linkNodeExists(suffixString[activeEdge])) {
 					//the character doesn't exists
 					activeNode.addEdgeNode(suffixString[characterIndex], std::make_shared<SuffixNode>(characterIndex, globalEndString, rootNode));
 					rule1_extension();
@@ -366,6 +372,10 @@ namespace Second {
 
 
 			}
+
+		}
+
+		void walkDown() {
 
 		}
 
@@ -398,9 +408,16 @@ namespace Second {
 
 		std::string suffixString;
 
+		// Number of characters left to be inserted
 		int remainingCharacters;
+
+		// the offset we have to insert the next character from the active node
 		int activeLength;
+
+		// the 
 		int activeEdge;
+
+
 		SuffixNode& activeNode;
 
 		std::shared_ptr<int>globalEndString; // Represents the global end of the suffix string that we are building

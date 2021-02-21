@@ -27,9 +27,12 @@ struct D:public B{
 int main(){
     using namespace First;
     
+    cout << (int)' ';
+    /*
     SuffixTree st("abcdefghijklmnopqrstuvwxyz");
 
     st.print();
+    */
     // std::cout<<"\nHELLOW";
 
     return 0;
