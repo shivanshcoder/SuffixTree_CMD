@@ -25,14 +25,14 @@ struct D:public B{
 
 
 int main(){
-    using namespace First;
+    using namespace Second;
     
     cout << (int)' ';
-    /*
-    SuffixTree st("abcdefghijklmnopqrstuvwxyz");
+    
+    SuffixTree st("aabaacaad$");
 
     st.print();
-    */
+    
     // std::cout<<"\nHELLOW";
 
     return 0;
