@@ -7,208 +7,6 @@
 #include<memory>
 
 
-namespace First {
-
-	int total_nodes = 0;
-
-
-	/*
-		SuffixNode class represents the Node in the suffix Tree and also
-		takes care of the Edge strings. Each Suffix Node except Root is
-		a Node with a tail(edge string)
-	*/
-	class SuffixNode {
-
-
-		// So that SuffixTree can access the private data members
-		// friend class SuffixTree;
-
-	public:
-
-		// Constructor for creating the Root Node for a suffix tree
-		SuffixNode() :
-			suffixLink(*this), startEdgeIndex(-1), endEdgeIndex(std::make_shared<int>(-1)) {
-			nodeName = std::to_string(total_nodes);
-			total_nodes++;
-		}
-
-		SuffixNode(int start_EdgeIndex, std::shared_ptr<int>& end_EdgeIndex, SuffixNode& suffix_Link) :
-			startEdgeIndex(start_EdgeIndex), endEdgeIndex(end_EdgeIndex), suffixLink(suffix_Link) {
-			nodeName = std::to_string(total_nodes);
-			total_nodes++;
-		}
-
-		// Checks if a edge exists starting with specified character from the node
-		bool linkNodeExists(char charLinkNode) {
-			return (linkedNodes.find(charLinkNode) != linkedNodes.end());
-		}
-
-		// Returns the pair of start and end index for the edge
-		// Returns -1, -1 in case the 
-		bool charExistsOnLinkedNodes(int activeEdgeChar) {
-
-		}
-
-
-		std::string& get_string() {
-
-		}
-
-
-		// Creates a new edge link from the node
-		void addEdgeNode(char edgeChar, const std::shared_ptr<SuffixNode>& node) {
-			linkedNodes[edgeChar] = node;
-
-		}
-
-		// Prints the Node and further connected nodes 
-		// using the Tree structure template
-		// the Suffix String has to be specified when calling, in order to save space
-		void print(std::string& suffixString, std::string indent = " ") {
-			using namespace std;
-			std::string curr_string;
-
-
-			if (startEdgeIndex != -1) {
-				// Only add if we have a valid start edge index
-
-				// endEdgeIndex is inclusive index, so if we have a pair 0,0 for index "hello"
-				// it should consider 0 as inclusive, so substr should be called like substr(0,1)
-				curr_string += ("+-{" + suffixString.substr(startEdgeIndex, (*endEdgeIndex) + 1) + "}-");
-			}
-
-			curr_string += (nodeName + ">" + suffixLink.nodeName);
-
-			cout << indent.substr(0, indent.size() - 1) << curr_string << endl;
-
-			// child nodes have a deeper indentation
-			indent += std::string((*endEdgeIndex - startEdgeIndex + nodeName.length()), ' ');
-
-			int i = 0;
-			for (auto& edge : linkedNodes) {
-				// edge.first is the first character for the edge 
-				// edge.second is the SuffixNode Reference
-
-				cout << indent << "|" << endl;
-				if (i == linkedNodes.size() - 1) {
-					edge.second->print(suffixString, indent + " ");
-				}
-				else {
-					edge.second->print(suffixString, indent + "|");
-				}
-
-			}
-
-
-		}
-
-		void splitEdge() {
-
-		}
-
-	protected:
-		// Starting index of the Edge String
-		int startEdgeIndex;
-
-		// Ending inclusive index for the SuffixString
-		std::shared_ptr<int>endEdgeIndex;
-
-		// Suffix Link for the Suffix tree
-		SuffixNode& suffixLink;
-
-		// Hash Map which stores all the further linked nodes of the Suffix Tree
-		std::unordered_map<char, std::shared_ptr<SuffixNode>> linkedNodes;
-
-		// TODO Separate the printable elements helpers
-		std::string nodeName;
-
-	};
-
-
-	class SuffixTree {
-
-	public:
-
-		SuffixTree(std::string _suffixString) :
-			suffixString(_suffixString),
-			activeNode(rootNode),   // Root node is the Active Node initially
-			activeLength(0),    // 
-			activeEdge(-1),  // Index of the character which represents the currently active character edge on the currently active node
-			globalEndString(std::make_shared<int>(-1)), // The global End is initially -1, meaning no characters are present in suffix Tree
-			remainingCharacters(0) {     //
-
-			buildTree();
-		}
-
-
-		void addPrefix(int characterIndex) {
-			remainingCharacters++;
-			(*globalEndString)++;
-
-
-			//Keep doing this if we have characters left
-			while (remainingCharacters > 0) {
-
-				// First Check if the 
-
-				if (!activeNode.linkNodeExists(suffixString[characterIndex])) {
-					//the character doesn't exists
-					activeNode.addEdgeNode(suffixString[characterIndex], std::make_shared<SuffixNode>(characterIndex, globalEndString, rootNode));
-					rule1_extension();
-					remainingCharacters--;
-				}
-				else {
-					// the character already exists
-
-				}
-
-
-			}
-
-		}
-
-		void print() {
-			rootNode.print(suffixString);
-		}
-
-		void rule1_extension() {
-			// Just by incrementing End, this gets taken care of
-
-		}
-
-		void rule2_extension() {
-
-		}
-
-		void rule3_extension() {
-
-		}
-
-
-		void buildTree() {
-
-			for (int i = 0; i < suffixString.length(); i++) {
-				addPrefix(i);
-			}
-		}
-
-	private:
-
-		std::string suffixString;
-
-		int remainingCharacters;
-		int activeLength;
-		int activeEdge;
-		SuffixNode& activeNode;
-
-		std::shared_ptr<int>globalEndString; // Represents the global end of the suffix string that we are building
-
-		SuffixNode rootNode;
-	};
-
-
-}
-
 namespace Second {
 
 	int total_nodes = 0;
@@ -221,26 +19,42 @@ namespace Second {
 	*/
 	struct SuffixNode {
 
+		/*
+		* 
+			@description:
+				Constructor used to make Root Nodes
 
-		// So that SuffixTree can access the private data members
-		// friend class SuffixTree;
-
-	//public:
-
-		// Constructor for creating the Root Node for a suffix tree
+		*/
 		SuffixNode() :
 			suffixLink(this), stringStartOffset(-1), edgeLength(std::make_shared<int>(-1)) {
 			nodeName = std::to_string(total_nodes);
 			total_nodes++;
 		}
 
-		SuffixNode(int start_EdgeIndex, std::shared_ptr<int> end_EdgeIndex, SuffixNode* suffix_Link) :
-			stringStartOffset(start_EdgeIndex), edgeLength(end_EdgeIndex), suffixLink(suffix_Link) {
+		/*
+
+			@startOffset:	the starting index of the edge
+			@edgeLen:		the edge character length
+			@suffix_Link:	the node that will be pointed by this node's suffixLink
+
+			@description:
+				Creates a Suffix Node
+
+		*/
+		SuffixNode(int startOffset, std::shared_ptr<int> edgeLen, SuffixNode* suffix_Link) :
+			stringStartOffset(startOffset), edgeLength(edgeLen), suffixLink(suffix_Link) {
 			nodeName = std::to_string(total_nodes);
 			total_nodes++;
 		}
 
-		// Checks if a edge exists starting with specified character from the node
+		/*
+
+			@charLinkNode:	the character for which we are checking the NodeLink, the starting character for the edge that we are searching
+
+			@description
+				Checks if a edge exists starting with specified character from the node
+
+		*/
 		bool linkNodeExists(char charLinkNode) {
 			return (childrenNodes.find(charLinkNode) != childrenNodes.end());
 		}
@@ -339,10 +153,10 @@ namespace Second {
 
 
 		/*
-			@node	: suffix node that needs a suffix link
+			@node:		suffix node that needs a suffix link
 
-			@return	: void
-		
+			@return:	void
+
 			@description:
 				This Function acts like a chain
 				If no node was assigned to suffLinkNeeded, this function saves the node in that place
@@ -359,14 +173,19 @@ namespace Second {
 		}
 
 		/*
-			@characterIndex	: Index of the character that we want to insert as extra leaf by splitting the edge
+			@characterIndex:	Index of the character that we want to insert as extra leaf by splitting the edge
+			@nextNode:			The Node whose parent edge we want to split
 
-			@return			: void
+			@return:			void
 
-			@description	:
-				
+			@description:
+				When we have to insert a new character as a leaf node into already existing edge string,
+				we call this function with the character we want to insert and the Node whose parent edge has to be split
+				The Edge is split and the new node has two children, the new leaf node with edge as characterIndex and
+				old edge that was split
+
 		*/
-		void splitEdge(int characterIndex, std::shared_ptr<SuffixNode>&nextNode) {
+		void splitEdge(int characterIndex, std::shared_ptr<SuffixNode>& nextNode) {
 
 			auto splitEdgeNode = std::make_shared<SuffixNode>(
 				nextNode->stringStartOffset,
@@ -388,6 +207,12 @@ namespace Second {
 			addSuffixLink(&(*nextNode));
 		}
 
+
+		/*
+
+			@characterIndex:
+
+		*/
 		void addPrefix(int characterIndex) {
 			remainingCharacters++;
 
@@ -433,8 +258,8 @@ namespace Second {
 					splitEdge(characterIndex, nextNode);
 
 				}
-					
-					remainingCharacters--;
+
+				remainingCharacters--;
 
 
 
