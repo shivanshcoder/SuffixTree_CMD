@@ -101,6 +101,7 @@ namespace Second {
 				else {
 					edge.second->print(suffixString, indent + "|");
 				}
+				i++;
 
 			}
 
@@ -259,7 +260,7 @@ namespace Second {
 					//the character link edge doesn't exist
 
 					activeNode->addEdgeNode(suffixString[characterIndex], std::make_shared<SuffixNode>(characterIndex, globalEndString, &rootNode));
-
+					addSuffixLink(activeNode);
 
 				}
 				else {
