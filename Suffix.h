@@ -6,10 +6,6 @@
 #include<memory>
 
 
-#ifdef PRINTABLE_SUFFIX_TREE
-
-#endif // PRINTABLE_SUFFIX_TREE
-
 int total_nodes = 0;
 
 /*
@@ -52,7 +48,9 @@ struct SuffixNode {
 
 		@charLinkNode:	the character for which we are checking the NodeLink, the starting character for the edge that we are searching
 
-		@description
+		@return:	boolean value stating whether edge link starting with character exists from the node
+
+		@description:
 			Checks if a edge exists starting with specified character from the node
 
 	*/
@@ -62,12 +60,24 @@ struct SuffixNode {
 
 
 	/*
+	
+		@edgeChar:	the starting character for the edge of the child node
+		@node:		the child node that you want to add
 		
+		@description:
+			Simply stores the shared_ptr of the child node into the hash table for this node
+
 	*/
 	void addEdgeNode(char edgeChar, const std::shared_ptr<SuffixNode>& node) {
 		childrenNodes[edgeChar] = node;
 	}
 
+	/*
+		@return:	number of characters present on the edge of the node
+
+		@description:
+			Simply return the edge character length
+	*/
 	int edgeLength() {
 		return (*stringEndOffset) - stringStartOffset + 1;
 	}
@@ -96,24 +106,36 @@ class SuffixTree {
 
 public:
 
+	/*
+	
+		@description:
+			Simply initializes the SuffixTree Object, string or characters should be added using +=operator into tree
+	
+	*/
 	SuffixTree() :
 		suffLinkNeeded(nullptr),
-		//suffixString(_suffixString),
 		activeNode(&rootNode),   // Root node is the Active Node initially
 		activeLength(0),    // 
 		activeEdge(-1),  // Index of the character which represents the currently active character edge on the currently active node
 		globalEndString(std::make_shared<int>(-1)), // The global End is initially -1, meaning no characters are present in suffix Tree
 		remainingCharacters(0) {     //
 
-		//buildTree();
 	}
 
+	/*
+		@c:		the character you want to insert into SuffixTree
+
+	*/
 	SuffixTree& operator+=(char c) {
 		suffixString += c;
 		addPrefix(suffixString.length() - 1);
 		return *this;
 	}
 
+	/*
+		@c:		the character you want to insert into SuffixTree
+
+	*/
 	SuffixTree& operator+=(std::string str) {
 
 		for (auto& c : str) {
@@ -123,15 +145,7 @@ public:
 	}
 
 
-	/*void buildTree() {
-
-		for (int i = 0; i < suffixString.length(); i++) {
-			addPrefix(i);
-		}
-	}*/
-
 protected:
-
 
 	/*
 		@node:		suffix node that needs a suffix link
@@ -214,6 +228,7 @@ protected:
 	*/
 	void addPrefix(int characterIndex) {
 
+
 		// Increase the number of characters that we have to add into suffix tree
 		remainingCharacters++;
 
@@ -225,6 +240,7 @@ protected:
 
 		//Keep doing this if we have characters left
 		while (remainingCharacters > 0) {
+				
 
 
 			if (activeLength == 0) {
@@ -289,7 +305,9 @@ protected:
 	}
 
 
-	
+	virtual void t() {
+
+	}
 
 	std::string suffixString;
 
@@ -324,21 +342,23 @@ public:
 		print(rootNode);
 	}
 
-	/*
-	
-		Prints the steps too
-	
-	*/
-	void buildTree(std::string _suffixString) {
-		suffixString = _suffixString;
+	void t() {
+		print();
+	}
 
-		for (int i = 0; i < suffixString.length(); i++) {
-			addPrefix(i);
-			print(rootNode);
+	/*
+
+		Prints the steps too
+
+	*/
+	void addStepWise(std::string _suffixString) {
+		for (auto& ch : _suffixString) {
+			(*this) += ch;
+			print();
 		}
 	}
 
-	
+
 
 private:
 

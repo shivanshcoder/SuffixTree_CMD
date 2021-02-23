@@ -7,10 +7,14 @@ int main(){
     std::string input;
     input = "mississi$";
     //std::cin >> input;
+
     PrintableSuffixTree st;
 
+    /*st += 's';
+    st += "mississi$";*/
+    st.addStepWise(input);
 
-    st.buildTree(input);
+    st.print();
     /*
     st += "aad";
     
