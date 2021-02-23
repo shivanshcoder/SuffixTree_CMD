@@ -16,9 +16,12 @@ namespace Second {
 		a Node with a tail(edge string)
 	*/
 	class SuffixNode {
-		public:
+
+		friend class SuffixTree;
+
+	public:
 		/*
- 
+
 			@description:
 				Constructor used to make Root Nodes
 
@@ -45,6 +48,7 @@ namespace Second {
 			total_nodes++;
 		}
 
+	private:
 		/*
 
 			@charLinkNode:	the character for which we are checking the NodeLink, the starting character for the edge that we are searching
@@ -58,66 +62,17 @@ namespace Second {
 		}
 
 
-
-
 		// Creates a new edge link from the node
 		void addEdgeNode(char edgeChar, const std::shared_ptr<SuffixNode>& node) {
 			childrenNodes[edgeChar] = node;
-
 		}
 
-		// Prints the Node and further connected nodes 
-		// using the Tree structure template
-		// the Suffix String has to be specified when calling, in order to save space
-		void print(std::string& suffixString, std::string indent = " ") {
-			using namespace std;
-			std::string curr_string;
-
-
-			if (stringStartOffset != -1) {
-				// Only add if we have a valid start edge index
-
-				// edgeLength is inclusive index, so if we have a pair 0,0 for index "hello"
-				// it should consider 0 as inclusive, so substr should be called like substr(0,1)
-				curr_string += ("+-{" + suffixString.substr(stringStartOffset, (*stringEndOffset) + 1 - stringStartOffset) + "}-"); // TODO check if +1 has to be removed now
-			}
-
-			curr_string += (nodeName + ">" + suffixLink->nodeName);
-
-			cout << indent.substr(0, indent.size() - 1) << curr_string << endl;
-
-			// child nodes have a deeper indentation
-			indent += std::string((*stringEndOffset - stringStartOffset + nodeName.length()), ' ');
-
-			int i = 0;
-			for (auto& edge : childrenNodes) {
-				// edge.first is the first character for the edge 
-				// edge.second is the SuffixNode Reference
-
-				cout << indent << "|" << endl;
-				if (i == childrenNodes.size() - 1) {
-					edge.second->print(suffixString, indent + " ");
-				}
-				else {
-					edge.second->print(suffixString, indent + "|");
-				}
-				i++;
-
-			}
-
-
-		}
-
-		int edgeLength(){
+		int edgeLength() {
 			return (*stringEndOffset) - stringStartOffset + 1;
 		}
 
-		void splitEdge() {
 
-		}
-
-		//protected:
-			// Starting index of the Edge String
+		// Starting index of the Edge String
 		int stringStartOffset;
 
 		// Ending inclusive index for the SuffixString
@@ -146,13 +101,101 @@ namespace Second {
 			activeNode(&rootNode),   // Root node is the Active Node initially
 			activeLength(0),    // 
 			activeEdge(-1),  // Index of the character which represents the currently active character edge on the currently active node
-			// globalEndString(std::make_shared<int>(-1)), // The global End is initially -1, meaning no characters are present in suffix Tree
+			globalEndString(std::make_shared<int>(-1)), // The global End is initially -1, meaning no characters are present in suffix Tree
 			remainingCharacters(0) {     //
-			globalEndString = std::make_shared<int>(-1);
+
 			buildTree();
 		}
 
-	// private:
+		void print() {
+			//rootNode.print(suffixString);
+			print(rootNode);
+		}
+
+		SuffixTree& operator+=(char c) {
+			suffixString += c;
+			addPrefix(suffixString.length() - 1);
+			return *this;
+		}
+
+		SuffixTree& operator+=(std::string str) {
+
+			for (auto& c : str) {
+				*this += c;
+			}
+			return *this;
+		}
+
+	private:
+
+		void print(SuffixNode& Node,int highlightLen = 0, std::string indent = " ") {
+			using namespace std;
+			string curr_string;
+
+			
+			int special_indent = 0;
+
+			if (Node.stringStartOffset != -1) {
+				// Only add if we have a valid start edge index
+
+				if (highlightLen > 0) {
+
+					curr_string += "\033[31m+-{";
+					curr_string += ("\033[7m" + suffixString.substr(Node.stringStartOffset, highlightLen) + "\033[0m\033[31m");
+					curr_string += suffixString.substr(Node.stringStartOffset + highlightLen- 1, Node.edgeLength() - highlightLen);
+					curr_string += "}-\033[0m";
+				}
+
+				// edgeLength is inclusive index, so if we have a pair 0,0 for index "hello"
+				// it should consider 0 as inclusive, so substr should be called like substr(0,1)
+				else {
+					curr_string += ("+-{" + suffixString.substr(Node.stringStartOffset, Node.edgeLength()) + "}-"); // TODO check if +1 has to be removed now
+				}
+
+				special_indent = 4;
+
+			}
+
+
+			if (activeNode == &Node) {
+				curr_string += ("\033[31;7m" + Node.nodeName + "\033[0m" + ">" + Node.suffixLink->nodeName);
+			}
+			else {
+				curr_string += (Node.nodeName + ">" + Node.suffixLink->nodeName);
+			}
+
+			cout << indent.substr(0, indent.size() - 1) << curr_string << endl;
+
+			
+
+			// child nodes have a deeper indentation
+			indent += string((Node.edgeLength() + Node.nodeName.length() + (Node.stringStartOffset > -1 ? 4:-2) ), ' ');
+
+			int i = 0;
+			for (auto& edge : Node.childrenNodes) {
+				// edge.first is the first character for the edge 
+				// edge.second is the SuffixNode Reference
+
+				if (activeNode == &Node && suffixString[activeEdge] == edge.first) {
+					highlightLen = activeLength;
+				}
+				else {
+					highlightLen = 0;
+				}
+
+				cout << indent << "|" << endl;
+				if (i == Node.childrenNodes.size() - 1)
+					print(*(edge.second), highlightLen, indent + " ");
+
+				else
+					print(*(edge.second), highlightLen, indent + "|");
+
+				i++;
+
+			}
+
+
+		}
 
 
 		/*
@@ -195,36 +238,36 @@ namespace Second {
 				Example of how the Edge is split
 
 															 (7,7)
-															+---$	
-															|	
+															+---$
+															|
 				abcdefg					=>			abcd----+
-				   0-6  							(0,3)   |	
+				   0-6  							(0,3)   |
 															+---efg$
 															  (4,7)
-			
-			
+
+
 			*/
 
 			auto splitEdgeNode = std::make_shared<SuffixNode>(
 				nextNode->stringStartOffset,	// Spliting Node's edge starts with the old node's start 
-				std::make_shared<int>(nextNode->stringStartOffset + activeLength -1),	// 
+				std::make_shared<int>(nextNode->stringStartOffset + activeLength - 1),	// 
 				&rootNode	//Default suffix link points to root
 				);
 
 			auto leafNode = std::make_shared<SuffixNode>(
 				characterIndex,	// Edge starts with the new characterIndex 
 				globalEndString,	// Has the globalEnd because it is a leaf node
-				&rootNode	
+				&rootNode
 				);
 
 			splitEdgeNode->addEdgeNode(suffixString[characterIndex], leafNode);
 
 			nextNode->stringStartOffset += activeLength;
-			// *(nextNode->edgeLength) -= activeLength;
 
 			splitEdgeNode->addEdgeNode(suffixString[nextNode->stringStartOffset], nextNode);
 
 			activeNode->addEdgeNode(suffixString[activeEdge], splitEdgeNode);
+
 			addSuffixLink(&(*splitEdgeNode));
 		}
 
@@ -247,6 +290,7 @@ namespace Second {
 
 			//Keep doing this if we have characters left
 			while (remainingCharacters > 0) {
+
 
 				if (activeLength == 0) {
 					activeEdge = characterIndex;
@@ -285,11 +329,11 @@ namespace Second {
 				}
 
 				remainingCharacters--;
-				if(activeNode == &rootNode && activeLength > 0){
+				if (activeNode == &rootNode && activeLength > 0) {
 					activeLength--;
 					activeEdge = characterIndex - remainingCharacters + 1;
 				}
-				else{
+				else {
 					activeNode = &*(activeNode->suffixLink);
 				}
 
@@ -299,7 +343,7 @@ namespace Second {
 		}
 
 		bool walkDown(SuffixNode& Node) {
-			if (activeLength >= Node.edgeLength()){
+			if (activeLength >= Node.edgeLength()) {
 				activeEdge += Node.edgeLength();
 				activeLength -= Node.edgeLength();
 				activeNode = &Node;
@@ -309,33 +353,14 @@ namespace Second {
 			return false;
 		}
 
-		void print() {
-			rootNode.print(suffixString);
-		}
-
-		void rule1_extension() {
-			// Just by incrementing End, this gets taken care of
-
-		}
-
-		void rule2_extension() {
-
-		}
-
-		void rule3_extension() {
-
-		}
-
 
 		void buildTree() {
 
 			for (int i = 0; i < suffixString.length(); i++) {
 				addPrefix(i);
-				rootNode.print(suffixString);
+				print(rootNode);
 			}
 		}
-
-	private:
 
 		std::string suffixString;
 
@@ -350,7 +375,7 @@ namespace Second {
 		int activeEdge;
 
 
-		SuffixNode *activeNode;
+		SuffixNode* activeNode;
 
 		std::shared_ptr<int>globalEndString; // Represents the global end of the suffix string that we are building
 

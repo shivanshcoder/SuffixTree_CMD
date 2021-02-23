@@ -27,12 +27,20 @@ struct D:public B{
 int main(){
     using namespace Second;
     
-    cout << (int)' ';
+    std::string input;
+    std::cin >> input;
+    SuffixTree st(input);
+    /*
+    st += "aad";
     
-    SuffixTree st("aabaacaad$");
-
+    cout << endl << endl;
     st.print();
-    
+
+    st += '$';
+
+    cout << endl << endl;*/
+    st.print();
+
     // std::cout<<"\nHELLOW";
 
     return 0;
