@@ -105,7 +105,10 @@ struct SuffixNode {
 
 };
 
-
+/*
+	SuffixTree implements the Suffix Tree and all the components needed
+	This class handles all the apending of the characters into the suffix tree
+*/
 class SuffixTree {
 
 public:
@@ -392,19 +395,23 @@ protected:
 	SuffixNode* suffLinkNeeded;
 };
 
+// Inorder to pause the console
 void PauseConsole() {
 	std::cout << "\n Press Enter to Continue\n\n";
-	//std::cin.ignore((std::numeric_limits< std::streamsize >::max)(), '\n');
 	
 	getchar();
 }
 
+/*
+	PrintableSuffixTree Handles the Printing of the Suffix Tree just like tree command in linux for directories
+*/
 class PrintableSuffixTree : public SuffixTree {
 public:
 
 	// Same constructors are used
 	using SuffixTree::SuffixTree;
 
+	// Simply prints the Suffix Tree starting from RootNode
 	void print() {
 		print(rootNode);
 	}
