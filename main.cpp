@@ -3,30 +3,18 @@
 
 
 int main(){
-    
+    using namespace std;
     std::string input;
     input = "mississi$";
-    //std::cin >> input;
 
     PrintableSuffixTree st;
 
-    /*st += 's';
-    st += "mississi$";*/
-    st.addStepWise(input);
+    st += "mississi$";
+
+    cout << "\n\n\n";
 
     st.print();
-    /*
-    st += "aad";
-    
-    cout << endl << endl;
-    st.print();
 
-    st += '$';
-
-    cout << endl << endl;*/
-    //st.print();
-
-    // std::cout<<"\nHELLOW";
 
     return 0;
 }

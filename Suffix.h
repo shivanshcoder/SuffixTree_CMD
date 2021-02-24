@@ -5,7 +5,7 @@
 #include<unordered_map>
 #include<memory>
 
-
+// To name the nodes
 int total_nodes = 0;
 
 /*
@@ -79,6 +79,10 @@ struct SuffixNode {
 			Simply return the edge character length
 	*/
 	int edgeLength() {
+
+		// edgeLength is inclusive index, so if we have a pair 0,0 for index "hello", it means 'h' character
+		// it should consider 0 as inclusive, so substr should be called like substr(0,1)
+
 		return (*stringEndOffset) - stringStartOffset + 1;
 	}
 
@@ -125,6 +129,8 @@ public:
 	/*
 		@c:		the character you want to insert into SuffixTree
 
+		@description:
+			Adds the character into our suffix tree
 	*/
 	SuffixTree& operator+=(char c) {
 		suffixString += c;
@@ -135,6 +141,8 @@ public:
 	/*
 		@c:		the character you want to insert into SuffixTree
 
+		@description:
+			Adds the character into our suffix tree
 	*/
 	SuffixTree& operator+=(std::string str) {
 
@@ -223,8 +231,10 @@ protected:
 
 	/*
 
-		@characterIndex:
+		@characterIndex:	the index of the character we want to insert into our suffix tree
 
+		@description:
+			Ukkonen's Suffix Tree algorithm to insert a character into our suffix tree
 	*/
 	void addPrefix(int characterIndex) {
 
@@ -235,15 +245,16 @@ protected:
 		// Rule 1 Extension gets taken care here, all the suffix leaf edges get the new suffix character automatically appended
 		(*globalEndString)++;
 
-		// 
-		suffLinkNeeded = nullptr;
+		// Shifted the place of doing this
+		// This was shifted because if we are walking down, we may flush this link unintentionally
+		//suffLinkNeeded = nullptr;
 
 		//Keep doing this if we have characters left
 		while (remainingCharacters > 0) {
 				
 
-
 			if (activeLength == 0) {
+				// It means we have to create a new node and add it as a childNode with the character as a start
 				activeEdge = characterIndex;
 			}
 
@@ -254,7 +265,10 @@ protected:
 			if (!activeNode->linkNodeExists(suffixString[activeEdge])) {
 				//the character link edge doesn't exist
 
+				// create a new leaf node and save it as a child of the current active node
 				activeNode->addEdgeNode(suffixString[characterIndex], std::make_shared<SuffixNode>(characterIndex, globalEndString, &rootNode));
+
+				// The newly created leaf edge needs suffix link
 				addSuffixLink(activeNode);
 
 			}
@@ -263,26 +277,46 @@ protected:
 				auto nextNode = activeNode->childrenNodes[suffixString[activeEdge]];
 
 				// Walk down if necessary
-				// if we walk down, continue
+				// Walk down happens if we have activeLength more than the edge length of the activeEdge from Active Node,
+				// We walk down further the links till active length becomes smaller than the edge length
 				if (walkDown(*nextNode)) {
+				// if we walk down, continue
 					continue;
 				}
 
+				// Check if the the next character is same as the character we are trying to insert
 				if (suffixString[nextNode->stringStartOffset + activeLength] == suffixString[characterIndex]) {
+
+					// We have same character, so this is a show stopper, we don't have to do much in this iteration
+
+					// Increment our activeLength because we found another common character on adge
 					activeLength++;
+
+					// We should add activeNode as the suffixLink for node that requires suffixLink in current iteration
+					// This seems logical and is taken from this stackoverflow answer advice https://stackoverflow.com/a/14580102
+					// Observation 3
 					addSuffixLink(activeNode);
 					break;
 				}
 
-				// We don't have same character  at the activeLength, so we try to split the edge
+				// We don't have same character at the activeLength, so we try to split the edge
 				splitEdge(characterIndex, nextNode);
 
 			}
 
+			// We have inserted a character, so decrement the value
 			remainingCharacters--;
+
+
 			if (activeNode == &rootNode && activeLength > 0) {
+
+				// If after insert the activeNode is RootNode and we still have a activeLength>0
+				// We decrement activeLength for one place
+				// shift the activeEdge character to right
+
 				activeLength--;
 				activeEdge = characterIndex - remainingCharacters + 1;
+				//activeEdge++;
 			}
 			else {
 				activeNode = &*(activeNode->suffixLink);
@@ -290,14 +324,37 @@ protected:
 
 
 		}
+		// flush out any old pointer that maybe stored from previous iteration
+		// TODO check if this safe to do here
+		suffLinkNeeded = nullptr;
 
 	}
 
+	/*
+	
+		@Node:		the node whose edge is smaller than the activeLength and we want to go down the tree chain
+
+		@return:	boolean value whether we walked down the tree chain or not
+
+		@description:
+			Checks if the Node Edge length is smaller than the active length
+			If it is the case we adjust the activeNode, activeLength, activeEdge according to the chain we followed
+			This keeps going till we have activeLength smaller than node edge length
+	
+	*/
 	bool walkDown(SuffixNode& Node) {
+
 		if (activeLength >= Node.edgeLength()) {
+
+			// we skipped the character present in the edge, so adjust  the activeEdge too (shift it right to later characters)
 			activeEdge += Node.edgeLength();
+
+			// we skipped the characters present in the edge, so adjust the activeLength too
 			activeLength -= Node.edgeLength();
+
+			// We walked down to one of the children node, so make it active node now
 			activeNode = &Node;
+
 			return true;
 		}
 
@@ -305,10 +362,11 @@ protected:
 	}
 
 
-	virtual void t() {
+	/*virtual void loopStepFunction() {
 
-	}
+	}*/
 
+	//Stores the actual string that is used to make the suffix tree
 	std::string suffixString;
 
 	// Number of characters left to be inserted
@@ -321,13 +379,16 @@ protected:
 	// This stores the index of the character from the suffixString, not the character itself
 	int activeEdge;
 
-
+	// Our currently activeNode, the place we insert new nodes during extensions
 	SuffixNode* activeNode;
 
-	std::shared_ptr<int>globalEndString; // Represents the global end of the suffix string that we are building
+	// Represents the global end of the suffix string that we are building
+	std::shared_ptr<int>globalEndString; 
 
+	// The Root Node for our suffix tree
 	SuffixNode rootNode;
 
+	// Stores the nodes that need suffixLink
 	SuffixNode* suffLinkNeeded;
 };
 
@@ -335,20 +396,23 @@ protected:
 class PrintableSuffixTree : public SuffixTree {
 public:
 
+	// Same constructors are used
 	using SuffixTree::SuffixTree;
 
 	void print() {
-		//rootNode.print(suffixString);
 		print(rootNode);
 	}
 
-	void t() {
-		print();
-	}
+	//void loopStepFunction() {
+	//	print();
+	//}
 
 	/*
 
-		Prints the steps too
+		@_suffixString:	the string that you want to append into the suffix tree
+
+		@description:
+			This functions adds the string into suffix tree but also prints the tree after each insert of character
 
 	*/
 	void addStepWise(std::string _suffixString) {
@@ -358,22 +422,37 @@ public:
 		}
 	}
 
-
-
 private:
 
+	/*
+	
+		@Node: the node to print
 
+		@highlightLen: the amount to highlight the edge of the node
+
+		@indent:	the indent amount for the node
+
+		@description:
+			this simply prints the node and also its children nodes too
+	
+	*/
 	void print(SuffixNode& Node, int highlightLen = 0, std::string indent = " ") {
 		using namespace std;
+
+		// Stores the string to print the edge and the node, its suffix link relationship
 		string curr_string;
 
 
-		int special_indent = 0;
-
 		if (Node.stringStartOffset != -1) {
+			// This if condition is to skip the root node, because root node has no edge
 			// Only add if we have a valid start edge index
 
 			if (highlightLen > 0) {
+				// If we want to highlight edge of a node, we hightlight that amount using black text, red background
+				// and whole edge string is highlighted with red text
+
+				// NOTE if the print function is used when the hightlightLen is larger than the edgeLength,
+				// whole string gets printed with highlightLen part highlighted
 
 				curr_string += "\033[31m+-{";
 				curr_string += ("\033[7m" + suffixString.substr(Node.stringStartOffset, highlightLen) + "\033[0m\033[31m");
@@ -381,24 +460,24 @@ private:
 				curr_string += "}-\033[0m";
 			}
 
-			// edgeLength is inclusive index, so if we have a pair 0,0 for index "hello"
-			// it should consider 0 as inclusive, so substr should be called like substr(0,1)
 			else {
 				curr_string += ("+-{" + suffixString.substr(Node.stringStartOffset, Node.edgeLength()) + "}-"); // TODO check if +1 has to be removed now
 			}
 
-			special_indent = 4;
 
 		}
 
 
 		if (activeNode == &Node) {
+			// If the node is the ActiveNode, hightlight the Node
 			curr_string += ("\033[31;7m" + Node.nodeName + "\033[0m" + ">" + Node.suffixLink->nodeName);
 		}
 		else {
 			curr_string += (Node.nodeName + ">" + Node.suffixLink->nodeName);
 		}
 
+		// Print the indent, so that tree gets printed with good formating
+		// indent for printing the node edge string has to be smaller by one unit because, edge string has extra character '+' to be printed
 		cout << indent.substr(0, indent.size() - 1) << curr_string << endl;
 
 
@@ -406,24 +485,34 @@ private:
 		// child nodes have a deeper indentation
 		indent += string((Node.edgeLength() + Node.nodeName.length() + (Node.stringStartOffset > -1 ? 4 : -2)), ' ');
 
+		// to check when we hit the last child node
 		int i = 0;
 		for (auto& edge : Node.childrenNodes) {
 			// edge.first is the first character for the edge 
 			// edge.second is the SuffixNode Reference
 
 			if (activeNode == &Node && suffixString[activeEdge] == edge.first) {
+				// if the node we are printing is active node, and we are going to print the node which is linked as ActiveEdge,
+				// we print the child node with hightlightLen as the activeLen
 				highlightLen = activeLength;
 			}
 			else {
+				// Simple node, no hightlighting needed
 				highlightLen = 0;
 			}
 
+			// Just for empty horizontal spacing line 
 			cout << indent << "|" << endl;
+
+
 			if (i == Node.childrenNodes.size() - 1)
+				// If the child node is the last node, indent dones't need '|'
 				print(*(edge.second), highlightLen, indent + " ");
 
 			else
+				// else we need to include this '|' in the children indent
 				print(*(edge.second), highlightLen, indent + "|");
+
 
 			i++;
 
