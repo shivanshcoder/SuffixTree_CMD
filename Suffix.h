@@ -60,10 +60,10 @@ struct SuffixNode {
 
 
 	/*
-	
+
 		@edgeChar:	the starting character for the edge of the child node
 		@node:		the child node that you want to add
-		
+
 		@description:
 			Simply stores the shared_ptr of the child node into the hash table for this node
 
@@ -111,10 +111,10 @@ class SuffixTree {
 public:
 
 	/*
-	
+
 		@description:
 			Simply initializes the SuffixTree Object, string or characters should be added using +=operator into tree
-	
+
 	*/
 	SuffixTree() :
 		suffLinkNeeded(nullptr),
@@ -251,7 +251,7 @@ protected:
 
 		//Keep doing this if we have characters left
 		while (remainingCharacters > 0) {
-				
+
 
 			if (activeLength == 0) {
 				// It means we have to create a new node and add it as a childNode with the character as a start
@@ -280,7 +280,7 @@ protected:
 				// Walk down happens if we have activeLength more than the edge length of the activeEdge from Active Node,
 				// We walk down further the links till active length becomes smaller than the edge length
 				if (walkDown(*nextNode)) {
-				// if we walk down, continue
+					// if we walk down, continue
 					continue;
 				}
 
@@ -331,7 +331,7 @@ protected:
 	}
 
 	/*
-	
+
 		@Node:		the node whose edge is smaller than the activeLength and we want to go down the tree chain
 
 		@return:	boolean value whether we walked down the tree chain or not
@@ -340,7 +340,7 @@ protected:
 			Checks if the Node Edge length is smaller than the active length
 			If it is the case we adjust the activeNode, activeLength, activeEdge according to the chain we followed
 			This keeps going till we have activeLength smaller than node edge length
-	
+
 	*/
 	bool walkDown(SuffixNode& Node) {
 
@@ -383,7 +383,7 @@ protected:
 	SuffixNode* activeNode;
 
 	// Represents the global end of the suffix string that we are building
-	std::shared_ptr<int>globalEndString; 
+	std::shared_ptr<int>globalEndString;
 
 	// The Root Node for our suffix tree
 	SuffixNode rootNode;
@@ -392,6 +392,12 @@ protected:
 	SuffixNode* suffLinkNeeded;
 };
 
+void PauseConsole() {
+	std::cout << "\n Press Enter to Continue\n\n";
+	//std::cin.ignore((std::numeric_limits< std::streamsize >::max)(), '\n');
+	
+	getchar();
+}
 
 class PrintableSuffixTree : public SuffixTree {
 public:
@@ -415,17 +421,18 @@ public:
 			This functions adds the string into suffix tree but also prints the tree after each insert of character
 
 	*/
-	void addStepWise(std::string _suffixString) {
+	void addStepWise(const std::string& _suffixString) {
 		for (auto& ch : _suffixString) {
 			(*this) += ch;
 			print();
+			PauseConsole();
 		}
 	}
 
 private:
 
 	/*
-	
+
 		@Node: the node to print
 
 		@highlightLen: the amount to highlight the edge of the node
@@ -434,7 +441,7 @@ private:
 
 		@description:
 			this simply prints the node and also its children nodes too
-	
+
 	*/
 	void print(SuffixNode& Node, int highlightLen = 0, std::string indent = " ") {
 		using namespace std;
